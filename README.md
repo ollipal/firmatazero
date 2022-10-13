@@ -55,7 +55,7 @@ Arduino side: on Arduino IDE select `File > Examples > Firmata > StandardFirmata
 
 ![](firmata_ide.png)
 
-Then select your board and port from `Tools > Board and Tools > Port`. Then press `Upload`.
+Then select your board and port from `Tools > Board` and `Tools > Port`. Then press `Upload`.
 
 ## Supported devices
 
