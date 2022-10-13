@@ -1,0 +1,24 @@
+# if versions changed, change also on pyproject.toml and .github/workflows/main.yaml
+repos:
+  - repo: https://github.com/pycqa/isort
+    rev: 5.9.3
+    hooks:
+      - id: isort
+        name: isort
+  - repo: https://github.com/ambv/black
+    rev: 22.3.0
+    hooks:
+      - id: black
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.1.0
+    hooks:
+      - id: codespell
+        entry: codespell -L ser
+  - repo: local
+    hooks:
+      - id: pflake8
+        name: pflake8
+        stages: [commit]
+        language: system
+        entry: pflake8 --config=pyproject.toml
+        types: [python]
