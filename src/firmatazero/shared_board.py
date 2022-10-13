@@ -44,7 +44,9 @@ def detect_port():
         return serial_comports[0]
 
     # Raise error if no potential Arduinos detected
-    raise RuntimeError("Arduino port not found (DOCS LINK)")
+    raise RuntimeError(
+        "Arduino port not found. Specify with firmatazero.set_port(port)"
+    )
 
 
 class SharedBoard:
