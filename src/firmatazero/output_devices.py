@@ -4,13 +4,137 @@ LED_BUILTIN = 13
 DEFAULT_SERVO = 9
 
 
+class DigitalOutputDevice:
+    """
+    Represents a generic pin output device.
+
+    This class ha :meth:`on` method to switch the device on, a
+    corresponding :meth:`off` method, and a :meth:`toggle` method.
+
+    :type pin: int or str
+    :param pin:
+        The pin that the servo is connected to.
+        If pin is not int or str :exc:`AssertionError`
+        will be raised.
+
+    :param bool active_high:
+        If :data:`True` (the default), the :meth:`on` method will set the GPIO
+        to HIGH. If :data:`False`, the :meth:`on` method will set the GPIO to
+        LOW (the :meth:`off` method always does the opposite).
+
+    :type initial_value: bool or None
+    :param initial_value:
+        If :data:`False` (the default), the device will be off initially.  If
+        :data:`None`, the device will be left in whatever state the pin is
+        found in when configured for output (warning: this can be on).  If
+        :data:`True`, the device will be switched on initially.
+
+    :type pin_factory: None
+    :param pin_factory:
+        This does not do anything, makes compatible with gpiozero code.
+    """
+
+    def __init__(
+        self,
+        pin=None,
+        active_high=True,
+        initial_value=False,
+        pin_factory=None,  # Ignored
+    ):
+
+        assert isinstance(pin, (str, int))
+
+        self._active_state = active_high
+        self._pin = pin
+
+        with shared_board() as board:
+            self._board_pin = board.get_pin(f"d:{pin}:o")
+
+        self.value = self._get_value(initial_value)
+
+    def _get_value(self, value):
+        return value if self._active_state else not value
+
+    def on(self):
+        """
+        Turns the device on.
+        """
+        with shared_lock():
+            self._board_pin.write(self._get_value(True))
+
+    def off(self):
+        """
+        Turns the device off.
+        """
+        with shared_lock():
+            self._board_pin.write(self._get_value(False))
+
+    def toggle(self):
+        """
+        Reverse the state of the device. If it's on, turn it off; if it's off,
+        turn it on.
+        """
+        with shared_lock():
+            if self._get_value(self.value):
+                self.off()
+            else:
+                self.on()
+
+    @property
+    def value(self):
+        """
+        Returns 1 if the device is currently active and 0 otherwise. Setting
+        this property changes the state of the device.
+        """
+        with shared_lock():
+            return self._board_pin.read()
+
+    @value.setter
+    def value(self, value):
+        assert value in {True, False, 1, 0}
+
+        with shared_lock():
+            self._board_pin.write(value)
+
+    @property
+    def active_high(self):
+        """
+        When :data:`True`, the :attr:`value` property is :data:`True` when the
+        device's :attr:`~GPIODevice.pin` is high. When :data:`False` the
+        :attr:`value` property is :data:`True` when the device's pin is low
+        (i.e. the value is inverted).
+
+        This property can be set after construction; be warned that changing it
+        will invert :attr:`value` (i.e. changing this property doesn't change
+        the device's pin state - it just changes how that state is
+        interpreted).
+        """
+        return self._active_state
+
+    @active_high.setter
+    def active_high(self, value):
+        self._active_state = True if value else False
+        self._inactive_state = False if value else True
+
+    def __repr__(self):
+        return (
+            "<firmatazero.%s object on pin %r, active_high=%s, is_active=%s>"
+            % (
+                self.__class__.__name__,
+                self.pin,
+                self.active_high,
+                self.is_active,
+            )
+        )
+
+
 class LED:
     """
     Represents a light emitting diode(LED).
 
     Connect the cathode (short leg, flat side) of the LED to a ground pin;
     connect the anode (longer leg) to a limiting resistor; connect the other
-    side of the limiting resistor to a GPIO pin (the limiting resistor can be
+    side of the limiting resistor to a pin (the limiting resistor can be
     placed either side of the LED).
 
     The following example will light the LED::
@@ -21,7 +145,7 @@ class LED:
 
     :type pin: int or str
     :param pin:
-        The GPIO pin which the LED is connected to.
+        The pin which the LED is connected to.
         If pin is not int or str :exc:`AssertionError`
         will be raised.
 
@@ -89,7 +213,7 @@ class LED:
         assert value in {True, False, 1, 0}
 
         with shared_lock():
-            self._board_pin.read(value)
+            self._board_pin.write(value)
 
 
 class Servo:
@@ -129,7 +253,7 @@ class Servo:
 
     :type pin: int or str
     :param pin:
-        The GPIO pin that the servo is connected to.
+        The pin that the servo is connected to.
         If pin is not int or str :exc:`AssertionError`
         will be raised.
 

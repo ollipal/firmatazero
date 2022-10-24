@@ -61,6 +61,13 @@ Then select your board and port from `Tools > Board` and `Tools > Port`. Then pr
 
 You can use GPIO Zero's docs, if you take changes intpo account:
 
+### DigitalOutputDevice
+
+Same as GPIO Zero's [LED](https://gpiozero.readthedocs.io/en/stable/api_output.html?highlight=OutputDevice#digitaloutputdevice), except:
+
+- `blink()` not implemented
+- `pin_factory` does not have an effect
+
 ### LED
 
 Same as GPIO Zero's [LED](https://gpiozero.readthedocs.io/en/stable/api_output.html?highlight=Servo#gpiozero.LED), except: 

@@ -27,5 +27,5 @@ __version__ = "0.0.1"
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
-from .output_devices import LED, Servo
+from .output_devices import LED, DigitalOutputDevice, Servo
 from .shared_board import detect_port, get_board, set_board, set_port
